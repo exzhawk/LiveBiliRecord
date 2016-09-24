@@ -3,11 +3,13 @@ import json
 import logging
 import random
 import time
+from json import JSONDecodeError
 from struct import pack, unpack
 from xml.etree import ElementTree
 from xmlrpc.client import ServerProxy
 
 import aiohttp
+import requests
 
 from settings import *
 
@@ -28,6 +30,18 @@ class BilibiliClient:
     async def connect(self):
         url = BASE_ROOM_URL.format(self.url_room_id)
         logging.info('entering room: ' + url)
+        # r = requests.get(url)
+        # html = r.text
+        # m = ROOM_ID_RE.findall(html)
+        # room_id = m[0]
+        # self.room_id = int(room_id)
+        # r = requests.get(BASE_CID_URL.format(room_id))
+        # xml_string = '<root>' + r.text + '</root>'
+        # t = ElementTree.fromstring(xml_string)
+        # self.cmt_server = t.findtext('server')
+        # state = t.findtext('state')
+        # if state == "LIVE":
+        #     await self.go_living()
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 html = await r.text()
@@ -90,8 +104,11 @@ class BilibiliClient:
             elif action == 8:
                 logging.info('joined')
             elif action == 5:
-                body_str = body_bytes.decode('utf-8')
-                await self.parse_msg(body_str)
+                try:
+                    body_str = body_bytes.decode('utf-8')
+                    await self.parse_msg(body_str)
+                except JSONDecodeError as e:
+                    logging.warning(e)
             else:
                 logging.warning(action)
 
