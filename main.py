@@ -5,7 +5,7 @@ from BilibiliClient import BilibiliClient
 
 while True:
     try:
-        client = BilibiliClient(1040)
+        client = BilibiliClient(281)
         loop = asyncio.get_event_loop()
         asyncio.ensure_future(client.connect())
         loop.run_forever()
